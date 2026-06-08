@@ -4,6 +4,8 @@
 #include "Socket.h"
 #include "SocketBuffer.h"
 
+using namespace easycppsockets;
+
 SocketBuffer::SocketBuffer(Socket *socket)
     : socket_{socket}, readArea_{}, writeArea_{}
 {

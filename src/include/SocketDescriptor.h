@@ -2,52 +2,55 @@
 
 #include <unistd.h>
 
-class SocketDescriptor
+namespace easycppsockets
 {
-private:
-    int descriptor;
-
-public:
-    SocketDescriptor(int descriptor)
-        : descriptor{descriptor}
+    class SocketDescriptor
     {
-    }
+    private:
+        int descriptor;
 
-    SocketDescriptor(const SocketDescriptor &other) = delete;
-
-    SocketDescriptor(SocketDescriptor &&other) noexcept
-    {
-        this->descriptor = other.descriptor;
-        other.descriptor = -1;
-    }
-
-    SocketDescriptor &operator=(const SocketDescriptor &other) = delete;
-    SocketDescriptor &operator=(SocketDescriptor &&other) noexcept
-    {
-        if (this != &other)
+    public:
+        SocketDescriptor(int descriptor)
+            : descriptor{descriptor}
         {
-            if (this->descriptor != -1)
-            {
-                close(this->descriptor);
-            }
+        }
 
+        SocketDescriptor(const SocketDescriptor &other) = delete;
+
+        SocketDescriptor(SocketDescriptor &&other) noexcept
+        {
             this->descriptor = other.descriptor;
             other.descriptor = -1;
         }
 
-        return *this;
-    }
-
-    operator int()
-    {
-        return descriptor;
-    }
-
-    ~SocketDescriptor()
-    {
-        if (descriptor != -1)
+        SocketDescriptor &operator=(const SocketDescriptor &other) = delete;
+        SocketDescriptor &operator=(SocketDescriptor &&other) noexcept
         {
-            close(descriptor);
+            if (this != &other)
+            {
+                if (this->descriptor != -1)
+                {
+                    close(this->descriptor);
+                }
+
+                this->descriptor = other.descriptor;
+                other.descriptor = -1;
+            }
+
+            return *this;
         }
-    }
+
+        operator int()
+        {
+            return descriptor;
+        }
+
+        ~SocketDescriptor()
+        {
+            if (descriptor != -1)
+            {
+                close(descriptor);
+            }
+        }
+    };
 };

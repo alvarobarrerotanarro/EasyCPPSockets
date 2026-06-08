@@ -8,6 +8,8 @@
 #include "Socket.h"
 #include "SocketBuffer.h"
 
+using namespace easycppsockets;
+
 Socket::Socket(SocketDescriptor &&descriptor)
     : descriptor{std::move(descriptor)}
 {

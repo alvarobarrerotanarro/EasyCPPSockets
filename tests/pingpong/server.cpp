@@ -9,6 +9,8 @@
 #include "ServerSocket.h"
 #include "Socket.h"
 
+using namespace easycppsockets;
+
 int main()
 {
     ServerSocket server{3000, 10};

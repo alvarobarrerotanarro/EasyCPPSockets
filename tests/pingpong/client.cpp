@@ -4,6 +4,8 @@
 #include "ServerSocket.h"
 #include "Socket.h"
 
+using namespace easycppsockets;
+
 int main()
 {
     Socket socket{"127.0.0.1", 3000};

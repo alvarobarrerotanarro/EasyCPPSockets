@@ -10,6 +10,8 @@
 #include "ServerSocket.h"
 #include "Socket.h"
 
+using namespace easycppsockets;
+
 void ping(Socket &socket)
 {
     char ping[] = "ping\n";

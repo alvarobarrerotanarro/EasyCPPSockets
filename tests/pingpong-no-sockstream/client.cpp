@@ -4,6 +4,8 @@
 #include "ServerSocket.h"
 #include "Socket.h"
 
+using namespace easycppsockets;
+
 void pong(Socket &socket)
 {
     char pong[] = "pong\n";

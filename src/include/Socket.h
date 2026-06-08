@@ -18,132 +18,135 @@
 
 #include "SocketDescriptor.h"
 
-class ServerSocket;
-class SocketBuffer;
-
-class Socket
+namespace easycppsockets
 {
-    friend class ServerSocket;
-    friend class SocketBuffer;
+    class ServerSocket;
+    class SocketBuffer;
 
-private:
-    SocketDescriptor descriptor;
-    std::unique_ptr<SocketBuffer> sockStreamBuffer;
-    std::unique_ptr<std::iostream> sockStream;
-
-    /*
-     * Server to client socket.
-     */
-    explicit Socket(SocketDescriptor &&descriptor);
-
-public:
-    /*
-     * Client to server socket.
-     */
-    Socket(std::string serverIp, std::uint16_t serverPort);
-
-    Socket(const Socket &other) = delete;
-    Socket(Socket &&other) noexcept;
-
-    Socket &operator=(const Socket &other) = delete;
-    Socket &operator=(Socket &&other) noexcept;
-
-    std::iostream &getSockStream()
+    class Socket
     {
-        return *sockStream.get();
-    }
+        friend class ServerSocket;
+        friend class SocketBuffer;
 
-    template <typename Rep, typename Period>
-    void setOsTimeout(const std::chrono::duration<Rep, Period> &duration)
-    {
-        timeval tv;
-        tv.tv_usec = 0;
-        tv.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+    private:
+        SocketDescriptor descriptor;
+        std::unique_ptr<SocketBuffer> sockStreamBuffer;
+        std::unique_ptr<std::iostream> sockStream;
 
-        if (setsockopt(descriptor, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+        /*
+         * Server to client socket.
+         */
+        explicit Socket(SocketDescriptor &&descriptor);
+
+    public:
+        /*
+         * Client to server socket.
+         */
+        Socket(std::string serverIp, std::uint16_t serverPort);
+
+        Socket(const Socket &other) = delete;
+        Socket(Socket &&other) noexcept;
+
+        Socket &operator=(const Socket &other) = delete;
+        Socket &operator=(Socket &&other) noexcept;
+
+        std::iostream &getSockStream()
         {
-            throw std::runtime_error{std::string{"setsockopt failed: "} + strerror(errno)};
+            return *sockStream.get();
         }
-    }
 
-    /**
-     * There is no guarantee the entire buffer will be full as it depends on whatever is available at that moment.
-     */
-    inline ssize_t recv(void *buffer, size_t bufferBytesLength)
-    {
-        return ::recv(descriptor, buffer, bufferBytesLength, 0);
-    }
-
-    /**
-     * There is no guarantee the entire buffer will be send as it depends on whatever the os decides.
-     */
-    inline ssize_t send(void *buffer, size_t bufferBytesLength)
-    {
-        return ::send(descriptor, buffer, bufferBytesLength, 0);
-    }
-
-    /**
-     * Reads bloquing the current thread until the kernel supplies the
-     * requested ammount of bytes retuning the actual ammount of
-     * bytes read (the peer closed the connection and it was not possible
-     * to send all the data) or -1 in case of error.
-     */
-    inline ssize_t recvAll(void *buffer, size_t bufferBytesLength)
-    {
-        bool failure = false;
-        bool peerIsClosed = false;
-        size_t totalBytesRead = 0;
-        ssize_t bytesRead = -1;
-
-        do
+        template <typename Rep, typename Period>
+        void setOsTimeout(const std::chrono::duration<Rep, Period> &duration)
         {
-            bytesRead = ::recv(descriptor, static_cast<char *>(buffer) + totalBytesRead, bufferBytesLength - totalBytesRead, 0);
+            timeval tv;
+            tv.tv_usec = 0;
+            tv.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 
-            if (bytesRead == -1)
+            if (setsockopt(descriptor, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
             {
-                failure = true;
+                throw std::runtime_error{std::string{"setsockopt failed: "} + strerror(errno)};
             }
-            else if (bytesRead == 0)
-            {
-                peerIsClosed = true;
-            }
-            else
-            {
-                totalBytesRead += bytesRead;
-            }
+        }
 
-        } while (totalBytesRead < bufferBytesLength && !peerIsClosed && !failure);
-
-        return !failure ? totalBytesRead : -1;
-    }
-
-    /**
-     * Sends bloquing the current thread until the kernel dispatches the
-     * specified ammount of bytes or -1 in case of error.
-     */
-    inline ssize_t sendAll(void *buffer, size_t bufferBytesLength)
-    {
-        bool failure = false;
-        size_t totalBytesWritten = 0;
-        ssize_t bytesWritten = -1;
-
-        do
+        /**
+         * There is no guarantee the entire buffer will be full as it depends on whatever is available at that moment.
+         */
+        inline ssize_t recv(void *buffer, size_t bufferBytesLength)
         {
-            bytesWritten = ::send(descriptor, static_cast<char *>(buffer) + totalBytesWritten, bufferBytesLength - totalBytesWritten, 0);
+            return ::recv(descriptor, buffer, bufferBytesLength, 0);
+        }
 
-            if (bytesWritten == -1)
+        /**
+         * There is no guarantee the entire buffer will be send as it depends on whatever the os decides.
+         */
+        inline ssize_t send(void *buffer, size_t bufferBytesLength)
+        {
+            return ::send(descriptor, buffer, bufferBytesLength, 0);
+        }
+
+        /**
+         * Reads bloquing the current thread until the kernel supplies the
+         * requested ammount of bytes retuning the actual ammount of
+         * bytes read (the peer closed the connection and it was not possible
+         * to send all the data) or -1 in case of error.
+         */
+        inline ssize_t recvAll(void *buffer, size_t bufferBytesLength)
+        {
+            bool failure = false;
+            bool peerIsClosed = false;
+            size_t totalBytesRead = 0;
+            ssize_t bytesRead = -1;
+
+            do
             {
-                failure = true;
-            }
-            else
+                bytesRead = ::recv(descriptor, static_cast<char *>(buffer) + totalBytesRead, bufferBytesLength - totalBytesRead, 0);
+
+                if (bytesRead == -1)
+                {
+                    failure = true;
+                }
+                else if (bytesRead == 0)
+                {
+                    peerIsClosed = true;
+                }
+                else
+                {
+                    totalBytesRead += bytesRead;
+                }
+
+            } while (totalBytesRead < bufferBytesLength && !peerIsClosed && !failure);
+
+            return !failure ? totalBytesRead : -1;
+        }
+
+        /**
+         * Sends bloquing the current thread until the kernel dispatches the
+         * specified ammount of bytes or -1 in case of error.
+         */
+        inline ssize_t sendAll(void *buffer, size_t bufferBytesLength)
+        {
+            bool failure = false;
+            size_t totalBytesWritten = 0;
+            ssize_t bytesWritten = -1;
+
+            do
             {
-                totalBytesWritten += bytesWritten;
-            }
+                bytesWritten = ::send(descriptor, static_cast<char *>(buffer) + totalBytesWritten, bufferBytesLength - totalBytesWritten, 0);
 
-        } while (totalBytesWritten < bufferBytesLength && !failure);
+                if (bytesWritten == -1)
+                {
+                    failure = true;
+                }
+                else
+                {
+                    totalBytesWritten += bytesWritten;
+                }
 
-        return !failure ? bytesWritten : -1;
-    }
+            } while (totalBytesWritten < bufferBytesLength && !failure);
 
-    virtual ~Socket();
+            return !failure ? bytesWritten : -1;
+        }
+
+        virtual ~Socket();
+    };
 };
