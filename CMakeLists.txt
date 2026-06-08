@@ -19,7 +19,7 @@ install(TARGETS "${TARGET}"
     RUNTIME DESTINATION bin
 )
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/include/"
-    DESTINATION include
+    DESTINATION include/${TARGET}
 )
 
 # Subdirectories for tests
