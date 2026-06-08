@@ -7,21 +7,26 @@
 int main()
 {
     Socket socket{"127.0.0.1", 3000};
-    std::string line;
+    bool cont = true;
 
     try
     {
         do
         {
-            line = socket.readLine('\n');
+            std::string line;
+            socket.getSockStream() >> line;
 
             if (line == "ping")
             {
                 std::cout << "pong" << '\n';
-                socket.write("pong\n");
+                socket.getSockStream() << "pong" << std::endl;
+            }
+            else if (line.empty())
+            {
+                cont = false;
             }
 
-        } while (line.size() > 0);
+        } while (cont);
     }
     catch (const std::exception &e)
     {

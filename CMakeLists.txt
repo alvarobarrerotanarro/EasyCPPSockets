@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
-project(CPPSockets)
+project(EasyCPPSockets)
 
 set(TARGET ${PROJECT_NAME})
 
-add_executable("${TARGET}Server" "${CMAKE_SOURCE_DIR}/src/server.cpp")
-target_include_directories("${TARGET}Server" PUBLIC "${CMAKE_SOURCE_DIR}/src/include")
+add_library("${TARGET}" SHARED "${CMAKE_SOURCE_DIR}/src/SocketBuffer.cpp"  "${CMAKE_SOURCE_DIR}/src/ServerSocket.cpp" "${CMAKE_SOURCE_DIR}/src/Socket.cpp")
+target_include_directories("${TARGET}" PUBLIC "${CMAKE_SOURCE_DIR}/src/include")
 
-add_executable("${TARGET}Client" "${CMAKE_SOURCE_DIR}/src/client.cpp")
-target_include_directories("${TARGET}Client" PUBLIC "${CMAKE_SOURCE_DIR}/src/include")
+add_subdirectory("${CMAKE_SOURCE_DIR}/tests/pingpong")
+add_subdirectory("${CMAKE_SOURCE_DIR}/tests/pingpong-no-sockstream")

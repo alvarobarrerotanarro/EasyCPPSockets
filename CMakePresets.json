@@ -2,14 +2,12 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "Custom configure preset",
+            "name": "cmake-debug-build",
             "displayName": "Custom configure preset",
-            "description": "Sets Ninja generator, build and install directory",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "description": "Sets build and install directory",
+            "binaryDir": "${sourceDir}/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         }
     ]

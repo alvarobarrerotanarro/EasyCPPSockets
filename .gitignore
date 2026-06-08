@@ -1,2 +1,3 @@
 .vscode
 cmake-build
+cmake-debug-build

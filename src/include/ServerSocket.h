@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "Socket.h"
+#include "SocketDescriptor.h"
 
 class ServerSocket
 {
@@ -67,10 +68,9 @@ public:
             throw std::runtime_error{"Client socket open failed"};
         }
 
+        // return std::make_unique<Socket>(std::move(clientDescriptor));
         return std::unique_ptr<Socket>(new Socket{std::move(clientDescriptor)});
     }
 
-    virtual ~ServerSocket()
-    {
-    }
+    virtual ~ServerSocket() = default;
 };
