@@ -23,8 +23,16 @@ int SocketBuffer::underflow()
     }
 
     // Block until available
-    ssize_t bytesRead = socket_->recv(readArea_.data(), kBufferSize);
-    if (bytesRead < 1)
+    ssize_t bytesRead = 0;
+    try
+    {
+        bytesRead = socket_->recv(readArea_.data(), kBufferSize);
+        if (bytesRead == 0)
+        {
+            throw std::runtime_error{"peer is closed"};
+        }
+    }
+    catch (const std::runtime_error &e)
     {
         return traits_type::eof();
     }
@@ -37,11 +45,21 @@ int SocketBuffer::underflow()
 
 int SocketBuffer::overflow(int ch)
 {
-    size_t bytesWritten = pptr() - pbase();
+    size_t bytesToWrite = pptr() - pbase();
 
-    if (bytesWritten > 0 && socket_->send(pbase(), bytesWritten) == -1)
+    if (bytesToWrite > 0)
     {
-        return traits_type::eof(); // Send error
+        try
+        {
+            if (socket_->send(pbase(), bytesToWrite) == 0)
+            {
+                throw std::runtime_error{"peer is closed"};
+            }
+        }
+        catch (const std::runtime_error &e)
+        {
+            return traits_type::eof();
+        }
     }
 
     // Reset the write pointers

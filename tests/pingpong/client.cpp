@@ -23,7 +23,7 @@ int main()
                 std::cout << "pong" << '\n';
                 socket.getSockStream() << "pong" << std::endl;
             }
-            else if (line.empty())
+            else
             {
                 cont = false;
             }

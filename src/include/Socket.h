@@ -73,7 +73,13 @@ namespace easycppsockets
          */
         inline ssize_t recv(void *buffer, size_t bufferBytesLength)
         {
-            return ::recv(descriptor, buffer, bufferBytesLength, 0);
+            ssize_t bytesRead = ::recv(descriptor, buffer, bufferBytesLength, 0);
+            if (bytesRead == -1)
+            {
+                throw std::runtime_error{std::string{"recv failed: "} + strerror(errno)};
+            }
+
+            return bytesRead;
         }
 
         /**
@@ -81,18 +87,23 @@ namespace easycppsockets
          */
         inline ssize_t send(void *buffer, size_t bufferBytesLength)
         {
-            return ::send(descriptor, buffer, bufferBytesLength, 0);
+            ssize_t bytesWritten = ::send(descriptor, buffer, bufferBytesLength, 0);
+            if (bytesWritten == -1)
+            {
+                throw std::runtime_error{std::string{"send failed: "} + strerror(errno)};
+            }
+
+            return bytesWritten;
         }
 
         /**
-         * Reads bloquing the current thread until the kernel supplies the
+         * Reads bloquing the current thread until the os supplies the
          * requested ammount of bytes retuning the actual ammount of
          * bytes read (the peer closed the connection and it was not possible
-         * to send all the data) or -1 in case of error.
+         * to send all the data) throwing std::runtime_error in case of failure.
          */
         inline ssize_t recvAll(void *buffer, size_t bufferBytesLength)
         {
-            bool failure = false;
             bool peerIsClosed = false;
             size_t totalBytesRead = 0;
             ssize_t bytesRead = -1;
@@ -103,7 +114,7 @@ namespace easycppsockets
 
                 if (bytesRead == -1)
                 {
-                    failure = true;
+                    throw std::runtime_error{std::string{"recv failed: "} + strerror(errno)};
                 }
                 else if (bytesRead == 0)
                 {
@@ -114,18 +125,17 @@ namespace easycppsockets
                     totalBytesRead += bytesRead;
                 }
 
-            } while (totalBytesRead < bufferBytesLength && !peerIsClosed && !failure);
+            } while (totalBytesRead < bufferBytesLength && !peerIsClosed);
 
-            return !failure ? totalBytesRead : -1;
+            return totalBytesRead;
         }
 
         /**
-         * Sends bloquing the current thread until the kernel dispatches the
-         * specified ammount of bytes or -1 in case of error.
+         * Sends bloquing the current thread until the os dispatches the
+         * specified ammount of bytes or throwing std::runtime_error in case of failure.
          */
         inline ssize_t sendAll(void *buffer, size_t bufferBytesLength)
         {
-            bool failure = false;
             size_t totalBytesWritten = 0;
             ssize_t bytesWritten = -1;
 
@@ -135,16 +145,16 @@ namespace easycppsockets
 
                 if (bytesWritten == -1)
                 {
-                    failure = true;
+                    throw std::runtime_error{std::string{"send failed: "} + strerror(errno)};
                 }
                 else
                 {
                     totalBytesWritten += bytesWritten;
                 }
 
-            } while (totalBytesWritten < bufferBytesLength && !failure);
+            } while (totalBytesWritten < bufferBytesLength);
 
-            return !failure ? bytesWritten : -1;
+            return bytesWritten;
         }
 
         virtual ~Socket();
