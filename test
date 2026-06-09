@@ -1,0 +1,3 @@
+#! /bin/sh
+
+ctest --test-dir ./cmake-build --output-on-failure

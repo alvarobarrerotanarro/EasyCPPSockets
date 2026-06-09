@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(EasyCPPSockets VERSION 1.0.0)
 
+option(EASYCPPSOCKETS_BUILD_TESTS "Build EasyCPPSockets Tests" OFF)
+
+# Configuracion EasyCPPSockets
 file(GLOB EasyCPPSockets_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_library(EasyCPPSockets SHARED ${EasyCPPSockets_SOURCE_FILES})
 add_library(EasyCPPSockets::EasyCPPSockets ALIAS EasyCPPSockets)
@@ -11,6 +14,16 @@ target_include_directories(EasyCPPSockets PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+
+
+# Dependencias
+include(FetchContent)
+
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
+)
+
 
 # Soporte para instalacion
 install(TARGETS EasyCPPSockets
@@ -47,5 +60,18 @@ install(FILES
 )
 
 # Tests
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong-no-sockstream")
+if (EASYCPPSOCKETS_BUILD_TESTS)
+    enable_testing()
+    FetchContent_MakeAvailable(googletest)
+
+    add_executable(EasyCPPSocketsTests
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/ConnectionTest.cpp
+    )
+    target_link_libraries(EasyCPPSocketsTests PRIVATE EasyCPPSockets::EasyCPPSockets GTest::gtest_main)
+
+    include(GoogleTest)
+    gtest_discover_tests(EasyCPPSocketsTests)
+endif()
+
+# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong")
+# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong-no-sockstream")

@@ -42,7 +42,8 @@ bool isPong(Socket &socket)
     }
     else
     {
-        std::string line{lineData, std::min(4L, bytesRead)};
+        long lineLength = std::min(4L, bytesRead);
+        std::string line{lineData, static_cast<std::string::size_type>(lineLength)};
 
         if (line == "pong")
         {

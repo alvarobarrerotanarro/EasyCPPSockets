@@ -2,12 +2,13 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "cmake-debug-build",
+            "name": "cmake-build",
             "displayName": "Custom configure preset",
             "description": "Sets build and install directory",
             "binaryDir": "${sourceDir}/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "EASYCPPSOCKETS_BUILD_TESTS": "ON"
             }
         }
     ]
