@@ -82,19 +82,13 @@ EasyCPPSockets can also be installed and discovered through CMake's `find_packag
 First install the library:
 
 ```bash
-cmake -B build
-cmake --build build
-cmake --install build
+./configure-release && ./build && ./install
 ```
 
 If you want to install into a custom location:
 
 ```bash
-cmake -B build \
-    -DCMAKE_INSTALL_PREFIX=/path/to/install
-
-cmake --build build
-cmake --install build
+cmake -B cmake-build -DCMAKE_INSTALL_PREFIX=/path/to/install && ./build && ./install
 ```
 
 Then consume the package from another project:
@@ -118,14 +112,14 @@ target_link_libraries(MyApplication
 If EasyCPPSockets was installed into a custom directory, tell CMake where to search:
 
 ```bash
-cmake -B build \
+cmake -B cmake-build \
     -DCMAKE_PREFIX_PATH=/path/to/install
 ```
 
 Alternatively, you can point directly to the package configuration directory:
 
 ```bash
-cmake -B build \
+cmake -B cmake-build \
     -DEasyCPPSockets_DIR=/path/to/install/lib/cmake/EasyCPPSockets
 ```
 

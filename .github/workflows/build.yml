@@ -33,10 +33,10 @@ jobs:
           fi
 
       - name: Configure
-        run: cmake -B cmake-build
+        run: ./configure-release
 
       - name: Build
-        run: cmake --build cmake-build --parallel
+        run: ./build
 
       - name: Debug
         run: |

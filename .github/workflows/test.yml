@@ -36,7 +36,7 @@ jobs:
         run: cmake -B cmake-build -DEASYCPPSOCKETS_BUILD_TESTS=ON
 
       - name: Build
-        run: cmake --build cmake-build --parallel
+        run: ./build
 
       - name: Test
-        run: ctest --test-dir ./cmake-build --output-on-failure
+        run: ./test
