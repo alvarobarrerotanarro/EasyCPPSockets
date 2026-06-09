@@ -33,7 +33,13 @@ jobs:
           fi
 
       - name: Configure
-        run: cmake -B build
+        run: cmake -B cmake-build
 
       - name: Build
-        run: cmake --build build --parallel
+        run: cmake --build cmake-build --parallel
+
+      - name: Debug
+        run: |
+          pwd
+          ls -la
+          ls -la build || true

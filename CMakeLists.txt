@@ -12,8 +12,6 @@ target_include_directories(EasyCPPSockets PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-include(CMakePackageConfigHelpers)
-
 # Soporte para instalacion
 install(TARGETS EasyCPPSockets
     EXPORT EasyCPPSocketsTargets
@@ -30,6 +28,8 @@ install(EXPORT EasyCPPSocketsTargets
 )
 
 # Config file (find_package support)
+include(CMakePackageConfigHelpers)
+
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/EasyCPPSocketsConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/EasyCPPSocketsConfig.cmake
