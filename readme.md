@@ -19,6 +19,8 @@ The library wraps POSIX sockets behind RAII abstractions and integrates seamless
 
 * Linux
 * C++17 or newer
+* CMake
+* GCC
 * POSIX sockets
 
 ---
@@ -27,60 +29,108 @@ The library wraps POSIX sockets behind RAII abstractions and integrates seamless
 
 ## CMake Integration
 
-The recommended way to consume EasyCPPSockets is through `ExternalProject`.
+EasyCPPSockets can be consumed in two different ways depending on your workflow:
 
-Create a file named:
+* **FetchContent**: recommended when EasyCPPSockets is built as part of your project.
+* **find_package**: recommended when EasyCPPSockets has already been installed on the system or in a custom installation prefix.
 
-```text
-cmake-scripts/EasyCPPSocketsSetup.cmake
-```
+---
 
-with the following content:
+## Using FetchContent
 
-```cmake
-include(ExternalProject)
-
-set(EasyCPPSockets_INSTALL_DIR "${CMAKE_BINARY_DIR}/external/EasyCPPSockets")
-set(EasyCPPSockets_INCLUDE_DIR "${EasyCPPSockets_INSTALL_DIR}/include")
-set(EasyCPPSockets_LIB_DIR "${EasyCPPSockets_INSTALL_DIR}/lib")
-
-file(MAKE_DIRECTORY "${EasyCPPSockets_INCLUDE_DIR}")
-file(MAKE_DIRECTORY "${EasyCPPSockets_LIB_DIR}")
-
-ExternalProject_Add(easy_cpp_sockets_setup
-    GIT_REPOSITORY https://github.com/alvarobarrerotanarro/EasyCPPSockets.git
-    GIT_TAG main
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EasyCPPSockets_INSTALL_DIR}
-)
-
-add_library(EasyCPPSockets SHARED IMPORTED GLOBAL)
-
-set_target_properties(EasyCPPSockets PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${EasyCPPSockets_INCLUDE_DIR}"
-    IMPORTED_LOCATION
-    "${EasyCPPSockets_LIB_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}EasyCPPSockets${CMAKE_SHARED_LIBRARY_SUFFIX}"
-)
-
-add_dependencies(EasyCPPSockets easy_cpp_sockets_setup)
-```
-
-Then include the setup script from your project:
+`FetchContent` downloads and builds EasyCPPSockets as part of your project's build process.
 
 ```cmake
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 project(MyApplication)
 
-include(${CMAKE_SOURCE_DIR}/cmake-scripts/EasyCPPSocketsSetup.cmake)
+include(FetchContent)
+
+FetchContent_Declare(
+    EasyCPPSockets
+    GIT_REPOSITORY https://github.com/alvarobarrerotanarro/EasyCPPSockets.git
+    GIT_TAG main
+)
+
+FetchContent_MakeAvailable(EasyCPPSockets)
 
 add_executable(MyApplication
     src/main.cpp
 )
 
 target_link_libraries(MyApplication
-    PRIVATE EasyCPPSockets
+    PRIVATE EasyCPPSockets::EasyCPPSockets
 )
 ```
+
+This approach is ideal when:
+
+* You want fully reproducible builds.
+* You do not want users to install dependencies manually.
+* EasyCPPSockets is only used by a single project.
+
+---
+
+## Using find_package
+
+EasyCPPSockets can also be installed and discovered through CMake's `find_package()` mechanism.
+
+First install the library:
+
+```bash
+cmake -B build
+cmake --build build
+cmake --install build
+```
+
+If you want to install into a custom location:
+
+```bash
+cmake -B build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/install
+
+cmake --build build
+cmake --install build
+```
+
+Then consume the package from another project:
+
+```cmake
+cmake_minimum_required(VERSION 3.14)
+
+project(MyApplication)
+
+find_package(EasyCPPSockets REQUIRED)
+
+add_executable(MyApplication
+    src/main.cpp
+)
+
+target_link_libraries(MyApplication
+    PRIVATE EasyCPPSockets::EasyCPPSockets
+)
+```
+
+If EasyCPPSockets was installed into a custom directory, tell CMake where to search:
+
+```bash
+cmake -B build \
+    -DCMAKE_PREFIX_PATH=/path/to/install
+```
+
+Alternatively, you can point directly to the package configuration directory:
+
+```bash
+cmake -B build \
+    -DEasyCPPSockets_DIR=/path/to/install/lib/cmake/EasyCPPSockets
+```
+
+This approach is recommended when:
+
+* EasyCPPSockets is shared between multiple projects.
+* The library is managed by a package manager.
+* You want faster configuration times by avoiding dependency downloads.
 
 ---
 

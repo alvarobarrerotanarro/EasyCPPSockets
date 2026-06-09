@@ -4,9 +4,9 @@
 #include <memory>
 #include <chrono>
 
-#include "SocketDescriptor.h"
-#include "Socket.h"
-#include "SocketBuffer.h"
+#include "EasyCPPSockets/SocketDescriptor.h"
+#include "EasyCPPSockets/Socket.h"
+#include "EasyCPPSockets/SocketBuffer.h"
 
 using namespace easycppsockets;
 

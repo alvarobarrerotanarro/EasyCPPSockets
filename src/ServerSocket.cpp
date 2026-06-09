@@ -1,5 +1,5 @@
 #pragma once
 
-#include "ServerSocket.h"
+#include "EasyCPPSockets/ServerSocket.h"
 
 using namespace easycppsockets;

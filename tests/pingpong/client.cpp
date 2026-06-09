@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "ServerSocket.h"
-#include "Socket.h"
+#include "EasyCPPSockets/ServerSocket.h"
+#include "EasyCPPSockets/Socket.h"
 
 using namespace easycppsockets;
 

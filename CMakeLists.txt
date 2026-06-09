@@ -1,27 +1,51 @@
 cmake_minimum_required(VERSION 3.10)
-project(EasyCPPSockets)
+project(EasyCPPSockets VERSION 1.0.0)
 
-set(TARGET ${PROJECT_NAME})
+file(GLOB EasyCPPSockets_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+add_library(EasyCPPSockets SHARED ${EasyCPPSockets_SOURCE_FILES})
+add_library(EasyCPPSockets::EasyCPPSockets ALIAS EasyCPPSockets)
 
-add_library("${TARGET}" SHARED "${CMAKE_SOURCE_DIR}/src/SocketBuffer.cpp"  "${CMAKE_SOURCE_DIR}/src/ServerSocket.cpp" "${CMAKE_SOURCE_DIR}/src/Socket.cpp")
+target_compile_features(EasyCPPSockets PUBLIC cxx_std_17)
 
-target_include_directories("${TARGET}" PUBLIC
-  # Take headers from source when compiling
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/include>
-  # Take headers from install dir for consumers
+target_include_directories(EasyCPPSockets PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
-# Install dir structure
-install(TARGETS "${TARGET}"
+include(CMakePackageConfigHelpers)
+
+# Soporte para instalacion
+install(TARGETS EasyCPPSockets
+    EXPORT EasyCPPSocketsTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
 )
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/src/include/"
-    DESTINATION include/${TARGET}
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/EasyCPPSockets" DESTINATION include)
+install(EXPORT EasyCPPSocketsTargets
+    FILE EasyCPPSocketsTargets.cmake
+    NAMESPACE EasyCPPSockets::
+    DESTINATION lib/cmake/EasyCPPSockets
 )
 
-# Subdirectories for tests
-add_subdirectory("${CMAKE_SOURCE_DIR}/tests/pingpong")
-add_subdirectory("${CMAKE_SOURCE_DIR}/tests/pingpong-no-sockstream")
+# Config file (find_package support)
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/EasyCPPSocketsConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/EasyCPPSocketsConfig.cmake
+    INSTALL_DESTINATION lib/cmake/EasyCPPSockets
+)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/EasyCPPSocketsConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/EasyCPPSocketsConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/EasyCPPSocketsConfigVersion.cmake
+    DESTINATION lib/cmake/EasyCPPSockets
+)
+
+# Tests
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong-no-sockstream")

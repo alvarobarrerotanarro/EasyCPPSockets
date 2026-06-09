@@ -1,8 +1,8 @@
 #include <streambuf>
 #include <memory>
 
-#include "Socket.h"
-#include "SocketBuffer.h"
+#include "EasyCPPSockets/Socket.h"
+#include "EasyCPPSockets/SocketBuffer.h"
 
 using namespace easycppsockets;
 

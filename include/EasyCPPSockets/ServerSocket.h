@@ -7,8 +7,8 @@
 #include <cstdint>
 #include <memory>
 
-#include "Socket.h"
-#include "SocketDescriptor.h"
+#include "EasyCPPSockets/Socket.h"
+#include "EasyCPPSockets/SocketDescriptor.h"
 
 namespace easycppsockets
 {

@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <cmath>
 
-#include "ServerSocket.h"
-#include "Socket.h"
+#include "EasyCPPSockets/ServerSocket.h"
+#include "EasyCPPSockets/Socket.h"
 
 using namespace easycppsockets;
 
