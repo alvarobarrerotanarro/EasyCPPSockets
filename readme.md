@@ -1,5 +1,7 @@
 # EasyCPPSockets
 
+![Build](https://github.com/alvarobarrerotanarro/EasyCPPSockets/actions/workflows/build.yml/badge.svg)
+
 A lightweight modern C++ TCP socket library designed to provide a simple and idiomatic interface for client-server communication.
 
 The library wraps POSIX sockets behind RAII abstractions and integrates seamlessly with the C++ standard stream API.
