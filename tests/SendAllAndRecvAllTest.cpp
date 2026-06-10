@@ -4,6 +4,9 @@
 #include <thread>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
+#include <filesystem>
+#include <atomic>
 
 #include "EasyCPPSockets/ServerSocket.h"
 #include "EasyCPPSockets/Socket.h"
@@ -13,6 +16,7 @@
 namespace
 {
     using namespace easycppsockets;
+    namespace fs = std::filesystem;
 
     typedef struct Person
     {
@@ -23,6 +27,40 @@ namespace
 
         Person(const char *name, int age) : name{name}, age{age}
         {
+        }
+
+        static Person parse(const char *str)
+        {
+            size_t finalPos = std::strlen(str);
+            if (finalPos > 63)
+            {
+                throw std::runtime_error{"Failed to parse person. String length is over 63."};
+            }
+
+            std::ptrdiff_t numOcurrences = std::count(str, str + finalPos, ',');
+            if (numOcurrences != 1)
+            {
+                throw std::runtime_error{std::string("Failed to parse person. One and only comma is expected: ") + str};
+            }
+
+            const char *ocurrence = std::find(str, str + finalPos, ',');
+            const std::ptrdiff_t nameLength = ocurrence - str + 1;
+            const std::ptrdiff_t ageLength = str + finalPos - ocurrence;
+            char name[nameLength] = {0};
+            char ageStr[ageLength] = {0};
+
+            std::memcpy(name, str, nameLength - 1);
+            name[nameLength - 1] = '\0';
+            std::memcpy(ageStr, str + nameLength + 1, ageLength - 1);
+            ageStr[ageLength - 1] = '\0';
+
+            int age = std::atoi(ageStr);
+            if (age == 0 && std::strcmp("0", ageStr) != 0)
+            {
+                throw std::runtime_error{"Failed to parse person. Invalid numerical format for age."};
+            }
+
+            return {name, age};
         }
 
         friend std::ostream &operator<<(std::ostream &os, const Person &p)
@@ -47,8 +85,7 @@ namespace
             ssize_t bytesRead = serverConnection.recvAll(&receivedPerson, sizeof(Person));
 
             success = bytesRead == sizeof(Person) &&
-                std::memcmp(&receivedPerson, &personToTransfer, sizeof(Person)) == 0;   
-            });
+                std::memcmp(&receivedPerson, &personToTransfer, sizeof(Person)) == 0; });
 
         auto clientConnection = server.accept();
         clientConnection->sendAll(&personToTransfer, sizeof(Person));
@@ -58,141 +95,72 @@ namespace
         EXPECT_EQ(success, true);
     }
 
-    TEST(SendAllAndRecvAllTest, SendAndReceivePeople)
+    TEST(SendAllAndRecvAllTest, SendAndReceivePeopleMultipleClients)
     {
+        // Configure the server
         const int port = 3000;
-        int peopleCount = 100;
-        ServerSocket server{port, 1};
-        bool success = false;
+        int numClients = 1000;
+        ServerSocket server{port, numClients};
+        std::atomic<int> successCount = 0;
+        // Configure the server
 
-        // Load people
-        std::srand(static_cast<unsigned long>(std::time(nullptr)));
-        std::vector<Person> people;
-        const char *names[] = {
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Emma",
-            "Frank",
-            "Grace",
-            "Henry",
-            "Irene",
-            "Jack",
-        };
-        for (int i = 0; i < peopleCount; i++)
+        // Load people (~750 kib * 1000 people = ~750,000 kib = ~730 MiB)
+        const char *filePath = EASYCPPSOCKETS_SOURCE_DIR "/tests/people.csv";
+        if (!fs::exists(filePath))
         {
-            people.emplace_back(names[i], std::rand() % 100);
+            throw std::runtime_error{std::string{"Missing people csv file: "} + filePath};
         }
+        std::ifstream peopleCsvFile(filePath);
+        char personStr[64] = {0}; // Process header
+        peopleCsvFile.getline(personStr, 63);
 
-        std::thread clientThread{[peopleCount, &success, &people]()
+        std::vector<Person> people;
+        while (peopleCsvFile)
         {
-            Socket serverConnection{"127.0.0.1", port};
+            peopleCsvFile.getline(personStr, 63);
+            personStr[63] = '\0';
 
-            Person *receivedPeople = new Person[peopleCount];
-            ssize_t bytesRead = serverConnection.recvAll(receivedPeople, sizeof(Person) * peopleCount);
+            if (personStr[0] != '\0') // There is content after the \n
+            {
+                people.push_back(Person::parse(personStr));
+            }
+        }
+        // Load people
 
-            success = bytesRead == sizeof(Person) * peopleCount &&
-                std::memcmp(receivedPeople, people.data(), sizeof(Person) * peopleCount) == 0;
+        // Start clients
+        std::vector<std::thread> clientThreads;
+        clientThreads.reserve(numClients);
+        for (int i = 0; i < numClients; i++) {
+            clientThreads.emplace_back([&people, &successCount]() {
+                    Socket serverConnection{"127.0.0.1", port};
 
-            delete[] receivedPeople;
-        }};
+                    const size_t peopleCount = people.size();
+                    Person *receivedPeople = new Person[peopleCount];
+
+                    ssize_t bytesRead = serverConnection.recvAll(receivedPeople, sizeof(Person) * peopleCount);
+
+                    successCount += bytesRead == sizeof(Person) * peopleCount &&
+                            std::memcmp(receivedPeople, people.data(), sizeof(Person) * peopleCount) == 0 ? 1 : 0;
+
+                    delete[] receivedPeople;
+                });
+        }
+        // Start clients
+
+        // Send people to clients
+        for (int i = 0; i < numClients; i++) {
+            auto clientConnection = server.accept();
+            clientConnection->sendAll(people.data(), sizeof(Person) * people.size());
+        }
+        // Send people to clients
+
+        // Wait for threads to finish
+        for (int i = 0; i < numClients; i++) {
+            clientThreads.at(i).join();
+        }
+        // Wait for threads to finish
 
 
-        auto clientConnection = server.accept();
-        clientConnection->sendAll(people.data(), sizeof(Person) * peopleCount);
-
-        clientThread.join();
-        EXPECT_EQ(success, true);
+        EXPECT_EQ(successCount, numClients);
     }
 }

@@ -70,6 +70,7 @@ if (EASYCPPSOCKETS_BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/SendAllAndRecvAllTest.cpp
     )
     target_link_libraries(EasyCPPSocketsTests PRIVATE EasyCPPSockets::EasyCPPSockets GTest::gtest_main)
+    target_compile_definitions(EasyCPPSocketsTests PRIVATE EASYCPPSOCKETS_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
     include(GoogleTest)
     gtest_discover_tests(EasyCPPSocketsTests)
