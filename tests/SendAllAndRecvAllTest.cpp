@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <array>
 #include <cstring>
 #include <thread>
 #include <cstdint>
@@ -44,23 +45,24 @@ namespace
             }
 
             const char *ocurrence = std::find(str, str + finalPos, ',');
-            const std::ptrdiff_t nameLength = ocurrence - str + 1;
-            const std::ptrdiff_t ageLength = str + finalPos - ocurrence;
-            char name[nameLength] = {0};
-            char ageStr[ageLength] = {0};
+            std::ptrdiff_t nameLength = ocurrence - str + 1;
+            std::ptrdiff_t ageLength = str + finalPos - ocurrence;            
 
-            std::memcpy(name, str, nameLength - 1);
+            auto name = std::make_unique<char[]>(nameLength);
+            auto ageStr = std::make_unique<char[]>(ageLength);
+
+            std::memcpy(name.get(), str, nameLength - 1);
             name[nameLength - 1] = '\0';
-            std::memcpy(ageStr, str + nameLength + 1, ageLength - 1);
+            std::memcpy(ageStr.get(), str + nameLength + 1, ageLength - 1);
             ageStr[ageLength - 1] = '\0';
 
-            int age = std::atoi(ageStr);
-            if (age == 0 && std::strcmp("0", ageStr) != 0)
+            int age = std::atoi(ageStr.get());
+            if (age == 0 && std::strcmp("0", ageStr.get()) != 0)
             {
                 throw std::runtime_error{"Failed to parse person. Invalid numerical format for age."};
             }
 
-            return {name, age};
+            return {name.get(), age};
         }
 
         friend std::ostream &operator<<(std::ostream &os, const Person &p)
