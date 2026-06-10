@@ -185,7 +185,7 @@ namespace
             success = bytesRead == sizeof(Person) * peopleCount &&
                 std::memcmp(receivedPeople, people.data(), sizeof(Person) * peopleCount) == 0;
 
-            delete receivedPeople;
+            delete[] receivedPeople;
         }};
 
 

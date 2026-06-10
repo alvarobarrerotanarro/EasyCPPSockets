@@ -17,9 +17,9 @@ namespace
         ServerSocket server{port, 1};
 
         char message[] = "EasyCPPSockets";
-        int messageLength = sizeof(message);
+        constexpr int messageLength = sizeof(message);
 
-        std::thread clientThread{[&message, messageLength]()
+        std::thread clientThread{[&message]()
                                  {
                                      Socket serverConnection{"127.0.0.1", port};
                                      serverConnection.send(message, messageLength);
@@ -44,11 +44,11 @@ namespace
         clientThreads.reserve(numClients);
 
         char message[] = "EasyCPPSockets";
-        int messageLength = sizeof(message);
+        constexpr int messageLength = sizeof(message);
 
         for (int i = 0; i < numClients; i++)
         {
-            clientThreads.emplace_back([&message, messageLength]()
+            clientThreads.emplace_back([&message]()
                                        {
                 Socket serverConnection{"127.0.0.1", port};
                 serverConnection.send(message, messageLength); });
