@@ -11,5 +11,12 @@
                 "EASYCPPSOCKETS_BUILD_TESTS": "ON"
             }
         }
+    ],
+    "testPresets": [
+        {
+            "name": "Tests",
+            "description": "",
+            "displayName": ""
+        }
     ]
 }

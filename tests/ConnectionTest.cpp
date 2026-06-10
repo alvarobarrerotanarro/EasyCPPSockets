@@ -1,4 +1,5 @@
 #include <thread>
+#include <vector>
 
 #include "EasyCPPSockets/ServerSocket.h"
 #include "EasyCPPSockets/Socket.h"
@@ -24,16 +25,17 @@ namespace {
   TEST(ConnectionTestCase, MultipleClientsToServerConnection)
   {
     const int port = 3000;
-    int numClients = 10;
+    int numClients = 1000;
     ServerSocket server{port, numClients};
 
-    std::thread *clientThreads = new std::thread[numClients];
+    std::vector<std::thread> clientThreads;
+    clientThreads.reserve(numClients);
 
     // Raise client connections in differente threads
     for (int i = 0; i < numClients; i++) {
-      clientThreads[i] = std::thread{[]() {
+      clientThreads.emplace_back([]() {
         EXPECT_NO_THROW(Socket serverConnection("127.0.0.1", port));
-      }};
+      });
     }
     
     // Accept incoming connections
@@ -43,8 +45,7 @@ namespace {
 
     // Free resource
     for (int i = 0; i < numClients; i++) {
-      clientThreads[i].join();
+      clientThreads.at(i).join();
     }
-    delete clientThreads;
   }
 }

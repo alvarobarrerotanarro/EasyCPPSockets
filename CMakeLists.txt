@@ -66,12 +66,11 @@ if (EASYCPPSOCKETS_BUILD_TESTS)
 
     add_executable(EasyCPPSocketsTests
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/ConnectionTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/BasicSendAndReceiveTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/SendAllAndRecvAllTest.cpp
     )
     target_link_libraries(EasyCPPSocketsTests PRIVATE EasyCPPSockets::EasyCPPSockets GTest::gtest_main)
 
     include(GoogleTest)
     gtest_discover_tests(EasyCPPSocketsTests)
 endif()
-
-# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong")
-# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests/pingpong-no-sockstream")
