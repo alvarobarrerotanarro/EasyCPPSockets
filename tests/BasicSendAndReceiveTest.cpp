@@ -34,7 +34,7 @@ namespace
         clientThread.join();
     }
 
-    TEST(ReadAndWriteTest, MultipleClientsGreetServer)
+    TEST(BasicSendAndReceiveTest, MultipleClientsGreetServer)
     {
         const int port = 3000;
         int numClients = 1000;
@@ -68,7 +68,7 @@ namespace
         }
     }
 
-    TEST(ReadAndWriteTest, PingPong)
+    TEST(BasicSendAndReceiveTest, PingPong)
     {
         using namespace std::chrono_literals;
 
@@ -114,5 +114,31 @@ namespace
         }
 
         clientThread.join();
+    }
+
+    TEST(BasicSendAndReceiveTest, PeerClosed)
+    {
+        const int port = 3000;
+        const int numMessages = 3;
+        ServerSocket server{port, 1};
+
+        std::thread clientThread{[]() {
+            Socket serverConnetion{"127.0.0.1", port};
+
+            char message[] = "EasyCPPSockets";
+            for (int i = 0; i < numMessages; i++) {
+                serverConnetion.send(message, sizeof(message) - 1);
+            }
+        }};
+
+
+        auto clientConnection = server.accept();
+        char response[15] = {0};
+        ssize_t bytesRead = -1;
+        while ((bytesRead = clientConnection->recv(response, 14)) > 0);
+
+        clientThread.join();
+
+        EXPECT_EQ(bytesRead, 0);
     }
 }

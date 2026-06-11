@@ -42,7 +42,7 @@ namespace easycppsockets
         /*
          * Client to server socket.
          */
-        Socket(std::string serverIp, std::uint16_t serverPort);
+        Socket(const std::string &serverIp, std::uint16_t serverPort);
 
         Socket(const Socket &other) = delete;
         Socket(Socket &&other) noexcept;

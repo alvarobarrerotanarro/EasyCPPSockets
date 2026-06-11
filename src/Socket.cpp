@@ -18,7 +18,7 @@ Socket::Socket(SocketDescriptor &&descriptor)
     sockStream = std::make_unique<std::iostream>(sockStreamBuffer.get());
 }
 
-Socket::Socket(std::string serverIp, std::uint16_t serverPort)
+Socket::Socket(const std::string &serverIp, std::uint16_t serverPort)
     : descriptor{-1}
 {
     sockStreamBuffer = SocketBuffer::make(*this);

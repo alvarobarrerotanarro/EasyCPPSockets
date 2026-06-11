@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <thread>
@@ -46,7 +47,7 @@ namespace
 
             const char *ocurrence = std::find(str, str + finalPos, ',');
             std::ptrdiff_t nameLength = ocurrence - str + 1;
-            std::ptrdiff_t ageLength = str + finalPos - ocurrence;            
+            std::ptrdiff_t ageLength = str + finalPos - ocurrence;
 
             auto name = std::make_unique<char[]>(nameLength);
             auto ageStr = std::make_unique<char[]>(ageLength);
@@ -132,8 +133,10 @@ namespace
         // Start clients
         std::vector<std::thread> clientThreads;
         clientThreads.reserve(numClients);
-        for (int i = 0; i < numClients; i++) {
-            clientThreads.emplace_back([&people, &successCount]() {
+        for (int i = 0; i < numClients; i++)
+        {
+            clientThreads.emplace_back([&people, &successCount]()
+                                       {
                     Socket serverConnection{"127.0.0.1", port};
 
                     const size_t peopleCount = people.size();
@@ -144,24 +147,24 @@ namespace
                     successCount += bytesRead == sizeof(Person) * peopleCount &&
                             std::memcmp(receivedPeople, people.data(), sizeof(Person) * peopleCount) == 0 ? 1 : 0;
 
-                    delete[] receivedPeople;
-                });
+                    delete[] receivedPeople; });
         }
         // Start clients
 
         // Send people to clients
-        for (int i = 0; i < numClients; i++) {
+        for (int i = 0; i < numClients; i++)
+        {
             auto clientConnection = server.accept();
             clientConnection->sendAll(people.data(), sizeof(Person) * people.size());
         }
         // Send people to clients
 
         // Wait for threads to finish
-        for (int i = 0; i < numClients; i++) {
+        for (int i = 0; i < numClients; i++)
+        {
             clientThreads.at(i).join();
         }
         // Wait for threads to finish
-
 
         EXPECT_EQ(successCount, numClients);
     }
