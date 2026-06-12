@@ -74,7 +74,7 @@ namespace
 
     TEST(SendAllAndRecvAllTest, SendAndReceiveSinglePerson)
     {
-        const int port = 3000;
+        constexpr int port = 3000;
         ServerSocket server{port, 1};
 
         Person personToTransfer{"Alvaro Barrero", 18};
@@ -101,7 +101,7 @@ namespace
     TEST(SendAllAndRecvAllTest, SendAndReceivePeopleMultipleClients)
     {
         // Configure the server
-        const int port = 3000;
+        constexpr int port = 3000;
         int numClients = 1000;
         ServerSocket server{port, numClients};
         std::atomic<int> successCount = 0;

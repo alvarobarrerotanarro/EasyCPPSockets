@@ -1,6 +1,7 @@
 #include <thread>
 #include <vector>
 #include <chrono>
+#include <stdexcept>
 
 #include "EasyCPPSockets/ServerSocket.h"
 #include "EasyCPPSockets/Socket.h"
@@ -14,21 +15,50 @@ namespace
 
   TEST(ConnectionTestCase, SimpleSingleClientToServerConnection)
   {
-    const int port = 3000;
+    constexpr int port = 3000;
     ServerSocket server{port, 1};
 
-    auto clientThread = std::thread{[]()
-                                    {
-                                      Socket serverConnection{"127.0.0.1", port};
-                                    }};
+    auto clientThread = std::thread{[port]()
+    {
+      Socket serverConnection = Socket{"127.0.0.1", port};
+    }};
 
     auto clientConnection = server.accept();
     clientThread.join();
   }
 
+  TEST(ConnectionTestCase, GetSocketAddressAndPort)
+  {
+    constexpr int port = 3000;
+    ServerSocket server{port, 1};
+
+    bool clientSuccess = false;
+    bool serverSuccess = false;
+
+    std::string serverPresentationAddress = server.getPresentationAddress();
+    std::uint16_t serverPort = server.getPort();
+
+    std::thread clientThread{[port, &clientSuccess] () {
+    Socket conn{"127.0.0.1", port};
+    std::string clientPresentationAddress = conn.getPresentationAddress();
+    std::uint16_t clientPort = conn.getPort();
+    
+    clientSuccess = clientPort != port &&
+      clientPresentationAddress == "127.0.0.1";
+    }};
+
+
+    serverSuccess = serverPort == port &&
+      serverPresentationAddress == "0.0.0.0";
+    
+    clientThread.join();
+
+    EXPECT_TRUE(clientSuccess && serverSuccess);
+  }
+
   TEST(ConnectionTestCase, MultipleClientsToServerConnection)
   {
-    const int port = 3000;
+    constexpr int port = 3000;
     int numClients = 1000;
     ServerSocket server{port, numClients};
 

@@ -7,13 +7,18 @@
 #include "EasyCPPSockets/SocketDescriptor.h"
 #include "EasyCPPSockets/Socket.h"
 #include "EasyCPPSockets/SocketBuffer.h"
+#include "EasyCPPSockets/SocketAddress.h"
 
 using namespace easycppsockets;
+using namespace std::chrono_literals;
 
 Socket::Socket(SocketDescriptor &&descriptor)
     : descriptor{std::move(descriptor)}
 {
-    setOsTimeout(std::chrono::seconds{5});
+    setOsTimeout(10s);
+
+    address = SocketAddress::make(this->descriptor);
+
     sockStreamBuffer = SocketBuffer::make(*this);
     sockStream = std::make_unique<std::iostream>(sockStreamBuffer.get());
 }
@@ -52,10 +57,12 @@ Socket::Socket(const std::string &serverIp, std::uint16_t serverPort)
     {
         throw std::runtime_error{"Connect failed"};
     }
+
+    address = SocketAddress::make(descriptor);
 }
 
 Socket::Socket(Socket &&other) noexcept
-    : sockStreamBuffer{std::move(other.sockStreamBuffer)}, sockStream(std::move(other.sockStream)), descriptor{std::move(other.descriptor)}
+    : address{std::move(other.address)}, sockStreamBuffer{std::move(other.sockStreamBuffer)}, sockStream(std::move(other.sockStream)), descriptor{std::move(other.descriptor)}
 {
     if (this->sockStreamBuffer != nullptr)
     {
@@ -68,6 +75,7 @@ Socket &Socket::operator=(Socket &&other) noexcept
     if (this != &other)
     {
         this->descriptor = std::move(other.descriptor);
+        this->address = std::move(other.address);
         this->sockStreamBuffer = std::move(other.sockStreamBuffer);
         this->sockStream = std::move(other.sockStream);
 

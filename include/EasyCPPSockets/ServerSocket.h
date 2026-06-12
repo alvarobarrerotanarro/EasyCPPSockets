@@ -9,6 +9,7 @@
 
 #include "EasyCPPSockets/Socket.h"
 #include "EasyCPPSockets/SocketDescriptor.h"
+#include "EasyCPPSockets/SocketAddress.h"
 
 namespace easycppsockets
 {
@@ -16,6 +17,7 @@ namespace easycppsockets
     {
     private:
         SocketDescriptor descriptor;
+        SocketAddress address; 
 
     public:
         ServerSocket(std::uint16_t port, int maxSimultanealConnections)
@@ -41,6 +43,8 @@ namespace easycppsockets
             {
                 throw std::runtime_error{"Server socket listen failed"};
             }
+
+            address = SocketAddress::make(descriptor);
         }
 
         ServerSocket(const ServerSocket &other) = delete;
@@ -48,6 +52,7 @@ namespace easycppsockets
             : descriptor{-1}
         {
             this->descriptor = std::move(other.descriptor);
+            this->address = std::move(other.address);
         }
 
         ServerSocket &operator=(ServerSocket &&other)
@@ -55,6 +60,7 @@ namespace easycppsockets
             if (this != &other)
             {
                 this->descriptor = std::move(other.descriptor);
+                this->address = std::move(other.address);
             }
 
             return *this;
@@ -70,8 +76,17 @@ namespace easycppsockets
                 throw std::runtime_error{"Client socket open failed"};
             }
 
-            // return std::make_unique<Socket>(std::move(clientDescriptor));
             return std::unique_ptr<Socket>(new Socket{std::move(clientDescriptor)});
+        }
+
+        std::string getPresentationAddress()
+        {
+            return address.getPresentationAddress();
+        }
+
+        std::uint16_t getPort()
+        {
+            return address.getPort();
         }
 
         virtual ~ServerSocket() = default;

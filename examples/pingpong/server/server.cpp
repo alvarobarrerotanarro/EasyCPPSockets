@@ -13,13 +13,15 @@ using namespace easycppsockets;
 
 int main()
 {
-    ServerSocket server{3000, 10};
+    ServerSocket server{3000, 1};
+    std::cout << "Server at '" << server.getPresentationAddress() << ":" << server.getPort() << "'\n";
 
     try
     {
         while (true)
         {
-            std::unique_ptr<Socket> socket = server.accept();
+            std::unique_ptr<Socket> socket = server.accept(); 
+            std::cout << "New client " << socket->getPresentationAddress() << ":" << socket->getPort() << "'\n";
 
             bool cont = true;
             while (cont)

@@ -13,7 +13,7 @@ namespace
 
     TEST(BasicSendAndReceiveTest, ClientGreetsServer)
     {
-        const int port = 3000;
+        constexpr int port = 3000;
         ServerSocket server{port, 1};
 
         char message[] = "EasyCPPSockets";
@@ -36,7 +36,7 @@ namespace
 
     TEST(BasicSendAndReceiveTest, MultipleClientsGreetServer)
     {
-        const int port = 3000;
+        constexpr int port = 3000;
         int numClients = 1000;
         ServerSocket server{port, numClients};
 
@@ -72,7 +72,7 @@ namespace
     {
         using namespace std::chrono_literals;
 
-        const int port = 3000;
+        constexpr int port = 3000;
         int numPings = 10;
         ServerSocket server(port, 1);
 
@@ -118,7 +118,7 @@ namespace
 
     TEST(BasicSendAndReceiveTest, PeerClosed)
     {
-        const int port = 3000;
+        constexpr int port = 3000;
         const int numMessages = 3;
         ServerSocket server{port, 1};
 

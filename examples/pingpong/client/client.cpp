@@ -1,7 +1,7 @@
 #include <iostream>
+#include <string>
 #include <stdexcept>
 
-#include "EasyCPPSockets/ServerSocket.h"
 #include "EasyCPPSockets/Socket.h"
 
 using namespace easycppsockets;
@@ -9,8 +9,9 @@ using namespace easycppsockets;
 int main()
 {
     Socket socket{"127.0.0.1", 3000};
-    bool cont = true;
+    std::cout << "Cient socket info " << socket.getPresentationAddress() << ":" << socket.getPort() << "'\n";
 
+    bool cont = true;
     try
     {
         do

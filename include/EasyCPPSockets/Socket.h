@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <stdexcept>
 #include <memory>
 #include <cstring>
@@ -17,6 +18,7 @@
 #include <chrono>
 
 #include "EasyCPPSockets/SocketDescriptor.h"
+#include "EasyCPPSockets/SocketAddress.h"
 
 namespace easycppsockets
 {
@@ -30,6 +32,7 @@ namespace easycppsockets
 
     private:
         SocketDescriptor descriptor;
+        SocketAddress address;
         std::unique_ptr<SocketBuffer> sockStreamBuffer;
         std::unique_ptr<std::iostream> sockStream;
 
@@ -71,7 +74,7 @@ namespace easycppsockets
         /**
          * There is no guarantee the entire buffer will be full as it depends on whatever is available at that moment.
          */
-        inline ssize_t recv(void *buffer, size_t bufferBytesLength)
+        ssize_t recv(void *buffer, size_t bufferBytesLength)
         {
             ssize_t bytesRead = ::recv(descriptor, buffer, bufferBytesLength, 0);
             if (bytesRead == -1)
@@ -85,7 +88,7 @@ namespace easycppsockets
         /**
          * There is no guarantee the entire buffer will be send as it depends on whatever the os decides.
          */
-        inline ssize_t send(void *buffer, size_t bufferBytesLength)
+        ssize_t send(void *buffer, size_t bufferBytesLength)
         {
             ssize_t bytesWritten = ::send(descriptor, buffer, bufferBytesLength, 0);
             if (bytesWritten == -1)
@@ -102,7 +105,7 @@ namespace easycppsockets
          * bytes read (the peer closed the connection and it was not possible
          * to send all the data) throwing std::runtime_error in case of failure.
          */
-        inline ssize_t recvAll(void *buffer, size_t bufferBytesLength)
+        ssize_t recvAll(void *buffer, size_t bufferBytesLength)
         {
             bool peerIsClosed = false;
             size_t totalBytesRead = 0;
@@ -134,7 +137,7 @@ namespace easycppsockets
          * Sends bloquing the current thread until the os dispatches the
          * specified ammount of bytes or throwing std::runtime_error in case of failure.
          */
-        inline ssize_t sendAll(void *buffer, size_t bufferBytesLength)
+        ssize_t sendAll(void *buffer, size_t bufferBytesLength)
         {
             size_t totalBytesWritten = 0;
             ssize_t bytesWritten = -1;
@@ -155,6 +158,16 @@ namespace easycppsockets
             } while (totalBytesWritten < bufferBytesLength);
 
             return bytesWritten;
+        }
+
+        std::string getPresentationAddress()
+        {
+            return address.getPresentationAddress();
+        }
+
+        std::uint16_t getPort()
+        {
+            return address.getPort();
         }
 
         virtual ~Socket();
