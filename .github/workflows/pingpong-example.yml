@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Configure
-        run: ./configure-release
+        run: cmake . -B ./cmake-build -DCMAKE_INSTALL_PREFIX=/tmp/EasyCPPSockets
 
       - name: Build
         run: ./build
@@ -42,7 +42,7 @@ jobs:
         run: ./install 
 
       - name: Configure pingpong example
-        run: cmake ./examples/pingpong -B ./example-build
+        run: cmake ./examples/pingpong -B ./example-build -DCMAKE_PREFIX_PATH=/tmp/EasyCPPSockets
       
       - name: Build pingpon example
         run: cmake --build ./example-build
