@@ -1,0 +1,48 @@
+name: PingpongExample
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        compiler:
+          - gcc
+          - clang
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake build-essential clang
+
+      - name: Select compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            echo "CC=gcc" >> $GITHUB_ENV
+            echo "CXX=g++" >> $GITHUB_ENV
+          else
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
+          fi
+
+      - name: Configure
+        run: ./configure-release
+
+      - name: Build
+        run: ./build
+
+      - name: Install
+        run: ./install 
+
+      - name: Configure pingpong example
+        run: cmake ./examples/pingpong -B ./example-build
+      
+      - name: Build pingpon example
+        run: cmake --build ./example-build
