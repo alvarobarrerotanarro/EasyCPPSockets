@@ -10,10 +10,10 @@ namespace {
     using namespace easycppsockets;
 
     TEST(SockStreamTest, HelloWorld) {
-        constexpr int port = 3000;
-        ServerSocket server{port, 1};
+        ServerSocket server{0, 1};
+        std::uint16_t port = server.getPort();
 
-        std::thread clientThread{[]() {
+        std::thread clientThread{[port]() {
             Socket conn{"127.0.0.1", port};
             conn.getSockStream() << "Hello I'am a client. Never forget to flush the stream." << std::endl;
         }};

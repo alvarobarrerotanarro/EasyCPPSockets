@@ -3,15 +3,10 @@ project(PingPongClientExample)
 
 include(FetchContent)
 
-# TODO: Cambiar
-# FetchContent_Declare(
-#     EasyCPPSockets
-#     GIT_REPOSITORY https://github.com/alvarobarrerotanarro/EasyCPPSockets.git
-#     GIT_TAG dev
-# )
 FetchContent_Declare(
     EasyCPPSockets
-    SOURCE_DIR /home/alvaro/code/cppsockets
+    GIT_REPOSITORY https://github.com/alvarobarrerotanarro/EasyCPPSockets.git
+    GIT_TAG dev
 )
 FetchContent_MakeAvailable(EasyCPPSockets)
 

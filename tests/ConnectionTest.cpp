@@ -15,8 +15,8 @@ namespace
 
   TEST(ConnectionTestCase, SimpleSingleClientToServerConnection)
   {
-    constexpr int port = 3000;
-    ServerSocket server{port, 1};
+    ServerSocket server{0, 1};
+    std::uint16_t port = server.getPort();
 
     auto clientThread = std::thread{[port]()
     {
@@ -29,8 +29,8 @@ namespace
 
   TEST(ConnectionTestCase, GetSocketAddressAndPort)
   {
-    constexpr int port = 3000;
-    ServerSocket server{port, 1};
+    ServerSocket server{0, 1};
+    std::uint16_t port = server.getPort();
 
     bool clientSuccess = false;
     bool serverSuccess = false;
@@ -58,9 +58,9 @@ namespace
 
   TEST(ConnectionTestCase, MultipleClientsToServerConnection)
   {
-    constexpr int port = 3000;
     int numClients = 1000;
-    ServerSocket server{port, numClients};
+    ServerSocket server{0, numClients};
+    std::uint16_t port = server.getPort();
 
     std::vector<std::thread> clientThreads;
     clientThreads.reserve(numClients);
@@ -68,7 +68,7 @@ namespace
     // Raise client connections in differente threads
     for (int i = 0; i < numClients; i++)
     {
-      clientThreads.emplace_back([]()
+      clientThreads.emplace_back([port]()
                                  { EXPECT_NO_THROW(Socket serverConnection("127.0.0.1", port)); });
     }
 
@@ -87,8 +87,8 @@ namespace
 
   TEST(ConnectionTestCase, SocketTimeout)
   {
-    constexpr int port = 3000;
-    ServerSocket server{port, 1};
+    ServerSocket server{0, 1};
+    std::uint16_t port = server.getPort();
 
     std::thread clientThread{[port]()
     {

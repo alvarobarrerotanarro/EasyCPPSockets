@@ -13,13 +13,13 @@ namespace
 
     TEST(BasicSendAndReceiveTest, ClientGreetsServer)
     {
-        constexpr int port = 3000;
-        ServerSocket server{port, 1};
+        ServerSocket server{0, 1};
+        std::uint16_t port = server.getPort();
 
         char message[] = "EasyCPPSockets";
         constexpr int messageLength = sizeof(message);
 
-        std::thread clientThread{[&message]()
+        std::thread clientThread{[&message, port]()
                                  {
                                      Socket serverConnection{"127.0.0.1", port};
                                      serverConnection.send(message, messageLength);
@@ -36,9 +36,9 @@ namespace
 
     TEST(BasicSendAndReceiveTest, MultipleClientsGreetServer)
     {
-        constexpr int port = 3000;
         int numClients = 1000;
-        ServerSocket server{port, numClients};
+        ServerSocket server{0, numClients};
+        std::uint16_t port = server.getPort();
 
         std::vector<std::thread> clientThreads;
         clientThreads.reserve(numClients);
@@ -48,7 +48,7 @@ namespace
 
         for (int i = 0; i < numClients; i++)
         {
-            clientThreads.emplace_back([&message]()
+            clientThreads.emplace_back([&message, port]()
                                        {
                 Socket serverConnection{"127.0.0.1", port};
                 serverConnection.send(message, messageLength); });
@@ -72,11 +72,11 @@ namespace
     {
         using namespace std::chrono_literals;
 
-        constexpr int port = 3000;
         int numPings = 10;
-        ServerSocket server(port, 1);
+        ServerSocket server(0, 1);
+        std::uint16_t port = server.getPort();
 
-        std::thread clientThread{[]()
+        std::thread clientThread{[port]()
         {
             Socket serverConnection{"127.0.0.1", port};
 
@@ -118,11 +118,11 @@ namespace
 
     TEST(BasicSendAndReceiveTest, PeerClosed)
     {
-        constexpr int port = 3000;
         const int numMessages = 3;
-        ServerSocket server{port, 1};
+        ServerSocket server{0, 1};
+        std::uint16_t port = server.getPort();
 
-        std::thread clientThread{[]() {
+        std::thread clientThread{[port]() {
             Socket serverConnetion{"127.0.0.1", port};
 
             char message[] = "EasyCPPSockets";
@@ -130,7 +130,6 @@ namespace
                 serverConnetion.send(message, sizeof(message) - 1);
             }
         }};
-
 
         auto clientConnection = server.accept();
         char response[15] = {0};

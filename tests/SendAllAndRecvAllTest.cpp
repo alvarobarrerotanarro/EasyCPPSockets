@@ -74,13 +74,13 @@ namespace
 
     TEST(SendAllAndRecvAllTest, SendAndReceiveSinglePerson)
     {
-        constexpr int port = 3000;
-        ServerSocket server{port, 1};
+        ServerSocket server{0, 1};
+        std::uint16_t port = server.getPort();
 
         Person personToTransfer{"Alvaro Barrero", 18};
         bool success = false;
 
-        std::thread clientThread([&personToTransfer, &success]()
+        std::thread clientThread([&personToTransfer, &success, port]()
                                  {
             Socket serverConnection{"127.0.0.1", port};
 
@@ -101,9 +101,9 @@ namespace
     TEST(SendAllAndRecvAllTest, SendAndReceivePeopleMultipleClients)
     {
         // Configure the server
-        constexpr int port = 3000;
         int numClients = 1000;
-        ServerSocket server{port, numClients};
+        ServerSocket server{0, numClients};
+        std::uint16_t port = server.getPort();
         std::atomic<int> successCount = 0;
         // Configure the server
 
@@ -135,7 +135,7 @@ namespace
         clientThreads.reserve(numClients);
         for (int i = 0; i < numClients; i++)
         {
-            clientThreads.emplace_back([&people, &successCount]()
+            clientThreads.emplace_back([&people, &successCount, port]()
                                        {
                     Socket serverConnection{"127.0.0.1", port};
 
